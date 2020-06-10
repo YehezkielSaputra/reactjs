@@ -675,3 +675,213 @@
 <div align="right">
     <b><a href="#">back to top</a></b>
 </div>
+
+31. ### What is the difference between createElement and cloneElement?
+    JSX elements will be transpiled to `React.createElement()` functions to create React elements which are going to be used for the object representation of UI. Whereas `cloneElement` is used to clone an element and pass it new props.
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+    
+32. ### What is Lifting State Up in React?
+    When several components need to share the same changing data then it is recommended to *lift the shared state up* to their closest common ancestor. That means if two child components share the same data from its parent, then move the state to parent instead of maintaining local state in both of the child components.
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+    
+33. ### What are the different phases of component lifecycle?
+    The component lifecycle has three distinct lifecycle phases:
+    1. **Mounting:** The component is ready to mount in the browser DOM. This phase covers initialization from `constructor()`, `getDerivedStateFromProps()`, `render()`, and `componentDidMount()` lifecycle methods.
+
+    2. **Updating:** In this phase, the component get updated in two ways, sending the new props and updating the state either from `setState()` or `forceUpdate()`. This phase covers `getDerivedStateFromProps()`, `shouldComponentUpdate()`, `render()`, `getSnapshotBeforeUpdate()` and `componentDidUpdate()` lifecycle methods.
+
+    3. **Unmounting:** In this last phase, the component is not needed and get unmounted from the browser DOM. This phase includes `componentWillUnmount()` lifecycle method.
+
+    It's worth mentioning that React internally has a concept of phases when applying changes to the DOM. They are separated as follows
+
+    1. **Render** The component will render without any side-effects. This applies for Pure components and in this phase, React can pause, abort, or restart the render.
+
+    2. **Pre-commit** Before the component actually applies the changes to the DOM, there is a moment that allows React to read from the DOM through the `getSnapshotBeforeUpdate()`.
+
+    3. **Commit** React works with the DOM and executes the final lifecycles respectively `componentDidMount()` for mounting, `componentDidUpdate()` for updating, and `componentWillUnmount()` for unmounting.
+
+    React 16.3+ Phases (or an [interactive version](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/))
+
+    ![phases 16.3+](assets/phases16.3.jpg)
+
+    Before React 16.3
+
+    ![phases 16.2](assets/phases.png)
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+    
+34. ### What are the lifecycle methods of React?
+    React 16.3+
+    - **getDerivedStateFromProps:** Invoked right before calling `render()` and is invoked on *every* render. This exists for rare use cases where you need derived state. Worth reading [if you need derived state](https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html).
+    - **componentDidMount:** Executed after first rendering and here all AJAX requests, DOM or state updates, and set up event listeners should occur.
+    - **shouldComponentUpdate:** Determines if the component will be updated or not. By default it returns `true`. If you are sure that the component doesn't need to render after state or props are updated, you can return false value. It is a great place to improve performance as it allows you to prevent a re-render if component receives new prop.
+    - **getSnapshotBeforeUpdate:** Executed right before rendered output is committed to the DOM. Any value returned by this will be passed into `componentDidUpdate()`. This is useful to capture information from the DOM i.e. scroll position.
+    - **componentDidUpdate:** Mostly it is used to update the DOM in response to prop or state changes. This will not fire if `shouldComponentUpdate()` returns `false`.
+    - **componentWillUnmount** It will be used to cancel any outgoing network requests, or remove all event listeners associated with the component.
+
+    Before 16.3
+    - **componentWillMount:** Executed before rendering and is used for App level configuration in your root component.
+    - **componentDidMount:** Executed after first rendering and here all AJAX requests, DOM or state updates, and set up event listeners should occur.
+    - **componentWillReceiveProps:** Executed when particular prop updates to trigger state transitions.
+    - **shouldComponentUpdate:** Determines if the component will be updated or not. By default it returns `true`. If you are sure that the component doesn't need to render after state or props are updated, you can return false value. It is a great place to improve performance as it allows you to prevent a re-render if component receives new prop.
+    - **componentWillUpdate:** Executed before re-rendering the component when there are props & state changes confirmed by `shouldComponentUpdate()` which returns true.
+    - **componentDidUpdate:** Mostly it is used to update the DOM in response to prop or state changes.
+    - **componentWillUnmount:** It will be used to cancel any outgoing network requests, or remove all event listeners associated with the component.
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+    
+35. ### What are Higher-Order Components?
+    A *higher-order component* (*HOC*) is a function that takes a component and returns a new component. Basically, it's a pattern that is derived from React's compositional nature.
+
+    We call them **pure components** because they can accept any dynamically provided child component but they won't modify or copy any behavior from their input components.
+
+    ```javascript
+    const EnhancedComponent = higherOrderComponent(WrappedComponent)
+    ```
+
+    HOC can be used for many use cases:
+    1. Code reuse, logic and bootstrap abstraction.
+    2. Render hijacking.
+    3. State abstraction and manipulation.
+    4. Props manipulation.
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+    
+36. ### How to create props proxy for HOC component?
+    You can add/edit props passed to the component using *props proxy* pattern like this:
+    ```jsx harmony
+    function HOC(WrappedComponent) {
+      return class Test extends Component {
+        render() {
+          const newProps = {
+            title: 'New Header',
+            footer: false,
+            showFeatureX: false,
+            showFeatureY: true
+          }
+
+          return <WrappedComponent {...this.props} {...newProps} />
+        }
+      }
+    }
+    ```
+    
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+    
+37. ### What is context?
+    *Context* provides a way to pass data through the component tree without having to pass props down manually at every level. For example, authenticated user, locale preference, UI theme need to be accessed in the application by many components.
+
+    ```javascript
+    const {Provider, Consumer} = React.createContext(defaultValue)
+    ```
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+    
+38. ### What is children prop?
+    *Children* is a prop (`this.prop.children`) that allow you to pass components as data to other components, just like any other prop you use. Component tree put between component's opening and closing tag will be passed to that component as `children` prop.
+
+    There are a number of methods available in the React API to work with this prop. These include `React.Children.map`, `React.Children.forEach`, `React.Children.count`, `React.Children.only`, `React.Children.toArray`.
+    A simple usage of children prop looks as below,
+
+    ```jsx harmony
+    const MyDiv = React.createClass({
+      render: function() {
+        return <div>{this.props.children}</div>
+      }
+    })
+
+    ReactDOM.render(
+      <MyDiv>
+        <span>{'Hello'}</span>
+        <span>{'World'}</span>
+      </MyDiv>,
+      node
+    )
+    ```
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+    
+39. ### How to write comments in React?
+    The comments in React/JSX are similar to JavaScript Multiline comments but are wrapped in curly braces.
+
+    **Single-line comments:**
+
+    ```jsx harmony
+    <div>
+      {/* Single-line comments(In vanilla JavaScript, the single-line comments are represented by double slash(//)) */}
+      {`Welcome ${user}, let's play React`}
+    </div>
+    ```
+
+    **Multi-line comments:**
+
+    ```jsx harmony
+    <div>
+      {/* Multi-line comments for more than
+       one line */}
+      {`Welcome ${user}, let's play React`}
+    </div>
+    ```
+    
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+    
+40. ### What is the purpose of using super constructor with props argument?
+    A child class constructor cannot make use of `this` reference until `super()` method has been called. The same applies for ES6 sub-classes as well. The main reason of passing props parameter to `super()` call is to access `this.props` in your child constructors.
+
+    **Passing props:**
+
+    ```javascript
+    class MyComponent extends React.Component {
+      constructor(props) {
+        super(props)
+
+        console.log(this.props) // prints { name: 'John', age: 42 }
+      }
+    }
+    ```
+
+    **Not passing props:**
+
+    ```javascript
+    class MyComponent extends React.Component {
+      constructor(props) {
+        super()
+
+        console.log(this.props) // prints undefined
+
+        // but props parameter is still available
+        console.log(props) // prints { name: 'John', age: 42 }
+      }
+
+      render() {
+        // no difference outside constructor
+        console.log(this.props) // prints { name: 'John', age: 42 }
+      }
+    }
+    ```
+
+    The above code snippets reveals that `this.props` is different only within the constructor. It would be the same outside the constructor.
+    
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
