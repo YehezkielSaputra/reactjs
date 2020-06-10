@@ -26,6 +26,26 @@
 | 18. | [What are "key" props and what is the benefit of using them in arrays of elements?](#what-are-key-props-and-what-is-the-benefit-of-using-them-in-arrays-of-elements) |
 | 19. | [What is the use of refs?](#what-is-the-use-of-refs) |
 | 20. | [How to create refs?](#how-to-create-refs) |
+| 21. | [What are forward refs?](#what-are-forward-refs) |
+| 22. | [Which is preferred option with in callback refs and findDOMNode()?](#which-is-preferred-option-with-in-callback-refs-and-finddomnode) |
+| 23. | [Why are String Refs legacy?](#why-are-string-refs-legacy) |
+| 24. | [What is Virtual DOM?](#what-is-virtual-dom) |
+| 25. | [How Virtual DOM works?](#how-virtual-dom-works) |
+| 26. | [What is the difference between Shadow DOM and Virtual DOM?](#what-is-the-difference-between-shadow-dom-and-virtual-dom) |
+| 27. | [What is React Fiber?](#what-is-react-fiber) |
+| 28. | [What is the main goal of React Fiber?](#what-is-the-main-goal-of-react-fiber) |
+| 29. | [What are controlled components?](#what-are-controlled-components) |
+| 30. | [What are uncontrolled components?](#what-are-uncontrolled-components) |
+| 31. | [What is the difference between createElement and cloneElement?](#what-is-the-difference-between-createelement-and-cloneelement) |
+| 32. | [What is Lifting State Up in React?](#what-is-lifting-state-up-in-react) |
+| 33. | [What are the different phases of component lifecycle?](#what-are-the-different-phases-of-component-lifecycle) |
+| 34. | [What are the lifecycle methods of React?](#what-are-the-lifecycle-methods-of-react) |
+| 35. | [What are Higher-Order components?](#what-are-higher-order-components) |
+| 36. | [How to create props proxy for HOC component?](#how-to-create-props-proxy-for-hoc-component) |
+| 37. | [What is context?](#what-is-context) |
+| 38. | [What is children prop?](#what-is-children-prop) |
+| 39. | [How to write comments in React?](#how-to-write-comments-in-react) |
+| 40. | [What is the purpose of using super constructor with props argument?](#what-is-the-purpose-of-using-super-constructor-with-props-argument) |
 
 ## React Basics
 
@@ -470,6 +490,187 @@
 
     You can also use *refs* in function components using **closures**.
     **Note**: You can also use inline ref callbacks even though it is not a recommended approach
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+
+21. ### What are forward refs?
+    *Ref forwarding* is a feature that lets some components take a *ref* they receive, and pass it further down to a child.
+
+    ```jsx harmony
+    const ButtonElement = React.forwardRef((props, ref) => (
+      <button ref={ref} className="CustomButton">
+        {props.children}
+      </button>
+    ));
+
+    // Create ref to the DOM button:
+    const ref = React.createRef();
+    <ButtonElement ref={ref}>{'Forward Ref'}</ButtonElement>
+    ```
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+
+22. ### Which is preferred option with in callback refs and findDOMNode()?
+    It is preferred to use *callback refs* over `findDOMNode()` API. Because `findDOMNode()` prevents certain improvements in React in the future.
+
+    The **legacy** approach of using `findDOMNode`:
+
+    ```javascript
+    class MyComponent extends Component {
+      componentDidMount() {
+        findDOMNode(this).scrollIntoView()
+      }
+
+      render() {
+        return <div />
+      }
+    }
+    ```
+
+    The recommended approach is:
+
+    ```javascript
+    class MyComponent extends Component {
+      constructor(props){
+        super(props);
+        this.node = createRef();
+      }
+      componentDidMount() {
+        this.node.current.scrollIntoView();
+      }
+
+      render() {
+        return <div ref={this.node} />
+      }
+    }
+    ```
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+
+23. ### Why are String Refs legacy?
+    If you worked with React before, you might be familiar with an older API where the `ref` attribute is a string, like `ref={'textInput'}`, and the DOM node is accessed as `this.refs.textInput`. We advise against it because *string refs have below issues*, and are considered legacy. String refs were **removed in React v16**.
+
+    1. They *force React to keep track of currently executing component*. This is problematic because it makes react module stateful, and thus causes weird errors when react module is duplicated in the bundle.
+    2. They are *not composable* — if a library puts a ref on the passed child, the user can't put another ref on it. Callback refs are perfectly composable.
+    3. They *don't work with static analysis* like Flow. Flow can't guess the magic that framework does to make the string ref appear on `this.refs`, as well as its type (which could be different). Callback refs are friendlier to static analysis.
+    4. It doesn't work as most people would expect with the "render callback" pattern (e.g. <DataGrid renderRow={this.renderRow} />)
+       ```jsx harmony
+       class MyComponent extends Component {
+         renderRow = (index) => {
+           // This won't work. Ref will get attached to DataTable rather than MyComponent:
+           return <input ref={'input-' + index} />;
+
+           // This would work though! Callback refs are awesome.
+           return <input ref={input => this['input-' + index] = input} />;
+         }
+
+         render() {
+           return <DataTable data={this.props.data} renderRow={this.renderRow} />
+         }
+       }
+       ```
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+
+24. ### What is Virtual DOM?
+    The *Virtual DOM* (VDOM) is an in-memory representation of *Real DOM*. The representation of a UI is kept in memory and synced with the "real" DOM. It's a step that happens between the render function being called and the displaying of elements on the screen. This entire process is called *reconciliation*.
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+
+25. ### How Virtual DOM works?
+    The *Virtual DOM* works in three simple steps.
+    1. Whenever any underlying data changes, the entire UI is re-rendered in Virtual DOM representation.
+        ![vdom](images/vdom1.png)
+
+    2. Then the difference between the previous DOM representation and the new one is calculated.
+        ![vdom2](images/vdom2.png)
+
+    3. Once the calculations are done, the real DOM will be updated with only the things that have actually changed.
+        ![vdom3](images/vdom3.png)
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+
+26. ### What is the difference between Shadow DOM and Virtual DOM?
+    The *Shadow DOM* is a browser technology designed primarily for scoping variables and CSS in *web components*. The *Virtual DOM* is a concept implemented by libraries in JavaScript on top of browser APIs.
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+
+27. ### What is React Fiber?
+    Fiber is the new *reconciliation* engine or reimplementation of core algorithm in React v16. The goal of React Fiber is to increase its suitability for areas like animation, layout, gestures, ability to pause, abort, or reuse work and assign priority to different types of updates; and new concurrency primitives.
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+
+28. ### What is the main goal of React Fiber?
+    The goal of *React Fiber* is to increase its suitability for areas like animation, layout, and gestures. Its headline feature is **incremental rendering**: the ability to split rendering work into chunks and spread it out over multiple frames.
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+
+29. ### What are controlled components?
+    A component that controls the input elements within the forms on subsequent user input is called **Controlled Component**, i.e, every state mutation will have an associated handler function.
+
+    For example, to write all the names in uppercase letters, we use handleChange as below,
+
+    ```javascript
+    handleChange(event) {
+      this.setState({value: event.target.value.toUpperCase()})
+    }
+    ```
+
+<div align="right">
+    <b><a href="#">back to top</a></b>
+</div>
+
+30. ### What are uncontrolled components?
+    The **Uncontrolled Components** are the ones that store their own state internally, and you query the DOM using a ref to find its current value when you need it. This is a bit more like traditional HTML.
+
+    In the below UserProfile component, the `name` input is accessed using ref.
+
+    ```jsx harmony
+    class UserProfile extends React.Component {
+      constructor(props) {
+        super(props)
+        this.handleSubmit = this.handleSubmit.bind(this)
+        this.input = React.createRef()
+      }
+
+      handleSubmit(event) {
+        alert('A name was submitted: ' + this.input.current.value)
+        event.preventDefault()
+      }
+
+      render() {
+        return (
+          <form onSubmit={this.handleSubmit}>
+            <label>
+              {'Name:'}
+              <input type="text" ref={this.input} />
+            </label>
+            <input type="submit" value="Submit" />
+          </form>
+        );
+      }
+    }
+    ```
+
+    In most cases, it's recommend to use controlled components to implement forms.
 
 <div align="right">
     <b><a href="#">back to top</a></b>
