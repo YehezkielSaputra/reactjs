@@ -27,8 +27,7 @@
 | 19. | [What is the use of refs?](#what-is-the-use-of-refs) |
 | 20. | [How to create refs?](#how-to-create-refs) |
 
-
-### React Basics
+## React Basics
 
 1. ### What is React?
 
